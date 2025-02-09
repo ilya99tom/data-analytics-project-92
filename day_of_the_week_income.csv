@@ -1,29 +1,4 @@
-"seller","operations","income"
-Dirk Stringer,4192,4925137932
-Michel DeFrance,4688,3260240833
-Albert Ringer,4695,2700327941
-Heather McBadden,4139,1873192318
-Innes del Castillo,4674,1762202127
-Abraham Bennet,9460,1617501169
-Dean Straight,4195,1256032202
-Livia Karsen,2564,1056902108
-Sheryl Hunter,4686,1056767862
-Michael O'Leary,5757,927500459
-Stearns MacFeather,46407
-Ann Dull,55090
-Morningstar Greene,88124
-Marjorie Green,109395
-Johnson White,126133
-Anne Ringer,136767
-Cheryl Carson,139818
-Reginald Blotchet-Halls,151773
-Charlene Locksley,152007
-Michael O'Leary,161108
-Burt Gringlesby,167993
-Abraham Bennet,170983
-Sylvia Panteley,179517
-Meander Smith,188075
-Sheryl Hunter,225515
+"seller","day_of_week","income"
 Abraham Bennet,monday,231845241
 Albert Ringer,monday,392378037
 Ann Dull,monday,39656842
