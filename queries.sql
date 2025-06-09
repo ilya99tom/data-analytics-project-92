@@ -105,14 +105,16 @@ WITH y16_25 AS (
     WHERE
         customers.age BETWEEN 16 AND 25
 ),
-y26_40 AS (
+
+    y26_40 AS (
     SELECT COUNT(*) AS age_count
     FROM
         customers
     WHERE
         customers.age BETWEEN 26 AND 40
 ),
-y40 AS (
+
+    y40 AS (
     SELECT COUNT(*) AS age_count
     FROM
         customers
