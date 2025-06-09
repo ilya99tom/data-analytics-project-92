@@ -15,10 +15,10 @@ SELECT
     ) AS income
 FROM
     employees
-    LEFT JOIN sales
-        ON employees.employee_id = sales.sales_person_id
-    LEFT JOIN products
-        ON sales.product_id = products.product_id
+LEFT JOIN sales
+    ON employees.employee_id = sales.sales_person_id
+LEFT JOIN products
+    ON sales.product_id = products.product_id
 GROUP BY
     employees.employee_id,
     employees.first_name,
@@ -37,10 +37,10 @@ SELECT
     ) AS avg_income
 FROM
     employees
-    LEFT JOIN sales
-        ON employees.employee_id = sales.sales_person_id
-    LEFT JOIN products
-        ON sales.product_id = products.product_id
+LEFT JOIN sales
+    ON employees.employee_id = sales.sales_person_id
+LEFT JOIN products
+    ON sales.product_id = products.product_id
 GROUP BY
     employees.employee_id,
     employees.first_name,
@@ -50,7 +50,8 @@ HAVING
         AVG(
             COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
         )
-    ) <
+    )
+    <
     (
         SELECT
             AVG(
@@ -58,8 +59,8 @@ HAVING
             ) AS overall_avg
         FROM
             sales AS s2
-            LEFT JOIN products AS p2
-                ON s2.product_id = p2.product_id
+        LEFT JOIN products AS p2
+            ON s2.product_id = p2.product_id
     )
 ORDER BY
     avg_income ASC;
@@ -84,10 +85,10 @@ SELECT
     ) AS income
 FROM
     employees
-    LEFT JOIN sales
-        ON employees.employee_id = sales.sales_person_id
-    LEFT JOIN products
-        ON sales.product_id = products.product_id
+LEFT JOIN sales
+    ON employees.employee_id = sales.sales_person_id
+LEFT JOIN products
+    ON sales.product_id = products.product_id
 GROUP BY
     employees.employee_id,
     employees.first_name,
@@ -158,8 +159,8 @@ SELECT
     ) AS income
 FROM
     sales
-    INNER JOIN products
-        ON sales.product_id = products.product_id
+INNER JOIN products
+    ON sales.product_id = products.product_id
 GROUP BY
     TO_CHAR(sales.sale_date, 'YYYY-MM')
 ORDER BY
@@ -177,8 +178,8 @@ WITH ranked_sales AS (
         ) AS rn
     FROM
         sales
-        INNER JOIN products
-            ON sales.product_id = products.product_id
+    INNER JOIN products
+        ON sales.product_id = products.product_id
     WHERE
         products.price = 0
 )
@@ -189,10 +190,10 @@ SELECT
     employees.first_name || ' ' || employees.last_name AS seller
 FROM
     ranked_sales
-    INNER JOIN customers
-        ON ranked_sales.customer_id = customers.customer_id
-    LEFT JOIN employees
-        ON ranked_sales.sales_person_id = employees.employee_id
+INNER JOIN customers
+    ON ranked_sales.customer_id = customers.customer_id
+LEFT JOIN employees
+    ON ranked_sales.sales_person_id = employees.employee_id
 WHERE
     ranked_sales.rn = 1
 ORDER BY
