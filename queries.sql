@@ -2,53 +2,53 @@
 SELECT
     COUNT(*) AS customers_count
 FROM
-    customers AS c;
+    customers;
 
 -- Топ 10 продавцов по операциям и выручке
 SELECT
-    CONCAT(e.first_name, ' ', e.last_name) AS seller,
-    COUNT(s.sales_person_id) AS operations,
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
+    COUNT(sales.sales_person_id) AS operations,
     FLOOR(
         SUM(
-            COALESCE(s.quantity, 0) * COALESCE(p.price, 0)
+            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
         )
     ) AS income
 FROM
-    employees AS e
-    LEFT JOIN sales AS s
-        ON e.employee_id = s.sales_person_id
-    LEFT JOIN products AS p
-        ON s.product_id = p.product_id
+    employees
+    LEFT JOIN sales
+        ON employees.employee_id = sales.sales_person_id
+    LEFT JOIN products
+        ON sales.product_id = products.product_id
 GROUP BY
-    e.employee_id,
-    e.first_name,
-    e.last_name
+    employees.employee_id,
+    employees.first_name,
+    employees.last_name
 ORDER BY
     income DESC NULLS LAST
 LIMIT 10;
 
 -- Продавцы с выручкой ниже среднего
 SELECT
-    CONCAT(e.first_name, ' ', e.last_name) AS seller,
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
     FLOOR(
         AVG(
-            COALESCE(s.quantity, 0) * COALESCE(p.price, 0)
+            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
         )
     ) AS avg_income
 FROM
-    employees AS e
-    LEFT JOIN sales AS s
-        ON e.employee_id = s.sales_person_id
-    LEFT JOIN products AS p
-        ON s.product_id = p.product_id
+    employees
+    LEFT JOIN sales
+        ON employees.employee_id = sales.sales_person_id
+    LEFT JOIN products
+        ON sales.product_id = products.product_id
 GROUP BY
-    e.employee_id,
-    e.first_name,
-    e.last_name
+    employees.employee_id,
+    employees.first_name,
+    employees.last_name
 HAVING
     FLOOR(
         AVG(
-            COALESCE(s.quantity, 0) * COALESCE(p.price, 0)
+            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
         )
     ) <
     (
@@ -66,8 +66,8 @@ ORDER BY
 
 -- Выручка продавцов по дням недели
 SELECT
-    CONCAT(e.first_name, ' ', e.last_name) AS seller,
-    CASE TO_CHAR(s.sale_date, 'ID')
+    CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
+    CASE TO_CHAR(sales.sale_date, 'ID')
         WHEN '1' THEN 'Monday'
         WHEN '2' THEN 'Tuesday'
         WHEN '3' THEN 'Wednesday'
@@ -79,22 +79,22 @@ SELECT
     END AS day_of_week,
     FLOOR(
         SUM(
-            COALESCE(s.quantity, 0) * COALESCE(p.price, 0)
+            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
         )
     ) AS income
 FROM
-    employees AS e
-    LEFT JOIN sales AS s
-        ON e.employee_id = s.sales_person_id
-    LEFT JOIN products AS p
-        ON s.product_id = p.product_id
+    employees
+    LEFT JOIN sales
+        ON employees.employee_id = sales.sales_person_id
+    LEFT JOIN products
+        ON sales.product_id = products.product_id
 GROUP BY
-    e.employee_id,
-    e.first_name,
-    e.last_name,
-    TO_CHAR(s.sale_date, 'ID')
+    employees.employee_id,
+    employees.first_name,
+    employees.last_name,
+    TO_CHAR(sales.sale_date, 'ID')
 ORDER BY
-    TO_CHAR(s.sale_date, 'ID'),
+    TO_CHAR(sales.sale_date, 'ID'),
     seller;
 
 -- Количество участников по возрастам
@@ -102,25 +102,25 @@ WITH y16_25 AS (
     SELECT
         COUNT(*) AS age_count
     FROM
-        customers AS c1
+        customers
     WHERE
-        c1.age BETWEEN 16 AND 25
+        customers.age BETWEEN 16 AND 25
 ),
 y26_40 AS (
     SELECT
         COUNT(*) AS age_count
     FROM
-        customers AS c2
+        customers
     WHERE
-        c2.age BETWEEN 26 AND 40
+        customers.age BETWEEN 26 AND 40
 ),
 y40 AS (
     SELECT
         COUNT(*) AS age_count
     FROM
-        customers AS c3
+        customers
     WHERE
-        c3.age > 40
+        customers.age > 40
 )
 
 SELECT
@@ -149,51 +149,51 @@ ORDER BY
 
 -- Количество уникальных покупателей и выручка по месяцам
 SELECT
-    TO_CHAR(s.sale_date, 'YYYY-MM') AS selling_month,
-    COUNT(DISTINCT s.customer_id) AS total_customers,
+    TO_CHAR(sales.sale_date, 'YYYY-MM') AS selling_month,
+    COUNT(DISTINCT sales.customer_id) AS total_customers,
     TRUNC(
         SUM(
-            COALESCE(s.quantity, 0) * COALESCE(p.price, 0)
+            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
         )
     ) AS income
 FROM
-    sales AS s
-    INNER JOIN products AS p
-        ON s.product_id = p.product_id
+    sales
+    INNER JOIN products
+        ON sales.product_id = products.product_id
 GROUP BY
-    TO_CHAR(s.sale_date, 'YYYY-MM')
+    TO_CHAR(sales.sale_date, 'YYYY-MM')
 ORDER BY
     selling_month ASC;
 
 -- Клиенты/продавцы первый товар с нулевой ценой
 WITH ranked_sales AS (
     SELECT
-        s.customer_id AS customer_id,
-        s.sale_date AS sale_date,
-        s.sales_person_id AS sales_person_id,
+        sales.customer_id,
+        sales.sale_date,
+        sales.sales_person_id,
         ROW_NUMBER() OVER (
-            PARTITION BY s.customer_id
-            ORDER BY s.sale_date ASC, s.sales_id ASC
+            PARTITION BY sales.customer_id
+            ORDER BY sales.sale_date ASC, sales.sales_id ASC
         ) AS rn
     FROM
-        sales AS s
-        INNER JOIN products AS p
-            ON s.product_id = p.product_id
+        sales
+        INNER JOIN products
+            ON sales.product_id = products.product_id
     WHERE
-        p.price = 0
+        products.price = 0
 )
 
 SELECT
-    rs.sale_date AS sale_date,
-    c.first_name || ' ' || c.last_name AS customer,
-    e.first_name || ' ' || e.last_name AS seller
+    ranked_sales.sale_date,
+    customers.first_name || ' ' || customers.last_name AS customer,
+    employees.first_name || ' ' || employees.last_name AS seller
 FROM
-    ranked_sales AS rs
-    INNER JOIN customers AS c
-        ON rs.customer_id = c.customer_id
-    LEFT JOIN employees AS e
-        ON rs.sales_person_id = e.employee_id
+    ranked_sales
+    INNER JOIN customers
+        ON ranked_sales.customer_id = customers.customer_id
+    LEFT JOIN employees
+        ON ranked_sales.sales_person_id = employees.employee_id
 WHERE
-    rs.rn = 1
+    ranked_sales.rn = 1
 ORDER BY
-    c.customer_id;
+    customers.customer_id;
