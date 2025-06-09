@@ -1,12 +1,10 @@
--- customers_count
--- Запрос выводит количество покупателей
+-- Количество покупателей
 SELECT
     COUNT(*) AS customers_count
 FROM
-    customers;
+    customers AS c;
 
--- top_10_total_income
--- Запрос выводит продавца, количество операций и выручку, сортирует по убыванию выручки, выводит топ-10
+-- Топ 10 продавцов по операциям и выручке
 SELECT
     CONCAT(e.first_name, ' ', e.last_name) AS seller,
     COUNT(s.sales_person_id) AS operations,
@@ -29,8 +27,7 @@ ORDER BY
     income DESC NULLS LAST
 LIMIT 10;
 
--- lowest_average_income
--- Запрос выводит продавцов и среднюю выручку продавца, сортирует по продавцу, выводит продавцов с выручкой ниже средней
+-- Продавцы с выручкой ниже среднего
 SELECT
     CONCAT(e.first_name, ' ', e.last_name) AS seller,
     FLOOR(
@@ -67,8 +64,7 @@ HAVING
 ORDER BY
     avg_income ASC;
 
--- day_of_the_week_income
--- Запрос выводит продавцов, день недели, выручку, сортирует по дню и продавцу
+-- Выручка продавцов по дням недели
 SELECT
     CONCAT(e.first_name, ' ', e.last_name) AS seller,
     CASE TO_CHAR(s.sale_date, 'ID')
@@ -101,8 +97,7 @@ ORDER BY
     TO_CHAR(s.sale_date, 'ID'),
     seller;
 
--- age_groups
--- Запрос создания временных таблиц, где считается количество участников из возрастных групп
+-- Количество участников по возрастам
 WITH y16_25 AS (
     SELECT
         COUNT(*) AS age_count
@@ -127,18 +122,23 @@ y40 AS (
     WHERE
         c3.age > 40
 )
+
 SELECT
     '16-25' AS age_category,
     age_count AS count_in_group
 FROM
     y16_25
+
 UNION ALL
+
 SELECT
     '26-40' AS age_category,
     age_count AS count_in_group
 FROM
     y26_40
+
 UNION ALL
+
 SELECT
     '40+' AS age_category,
     age_count AS count_in_group
@@ -147,8 +147,7 @@ FROM
 ORDER BY
     age_category ASC;
 
--- customers_by_month
--- Выводит дату (ГГГГ-ММ), количество уникальных покупателей и выручку
+-- Количество уникальных покупателей и выручка по месяцам
 SELECT
     TO_CHAR(s.sale_date, 'YYYY-MM') AS selling_month,
     COUNT(DISTINCT s.customer_id) AS total_customers,
@@ -166,8 +165,7 @@ GROUP BY
 ORDER BY
     selling_month ASC;
 
--- special_offer
--- Поиск клиентов, получивших первый товар с нулевой ценой и их продавцов
+-- Клиенты/продавцы первый товар с нулевой ценой
 WITH ranked_sales AS (
     SELECT
         s.customer_id AS customer_id,
@@ -184,6 +182,7 @@ WITH ranked_sales AS (
     WHERE
         p.price = 0
 )
+
 SELECT
     rs.sale_date AS sale_date,
     c.first_name || ' ' || c.last_name AS customer,
