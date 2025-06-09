@@ -1,6 +1,5 @@
 -- Количество покупателей
-SELECT
-    COUNT(*) AS customers_count
+SELECT COUNT(*) AS customers_count
 FROM
     customers;
 
@@ -100,24 +99,21 @@ ORDER BY
 
 -- Количество участников по возрастам
 WITH y16_25 AS (
-    SELECT
-        COUNT(*) AS age_count
+    SELECT COUNT(*) AS age_count
     FROM
         customers
     WHERE
         customers.age BETWEEN 16 AND 25
 ),
 y26_40 AS (
-    SELECT
-        COUNT(*) AS age_count
+    SELECT COUNT(*) AS age_count
     FROM
         customers
     WHERE
         customers.age BETWEEN 26 AND 40
 ),
 y40 AS (
-    SELECT
-        COUNT(*) AS age_count
+    SELECT COUNT(*) AS age_count
     FROM
         customers
     WHERE
