@@ -7,13 +7,13 @@ select count(*) as customers_count from customers;
 select
     concat(e.first_name, ' ', e.last_name) as seller,
     count(s.sales_person_id) as operations,
-    floor(sum(s.quantity * p.price)) as income
+    floor(sum(coalesce(s.quantity,0) * coalesce(p.price,0))) as income
 from employees e
 left join sales s
     on e.employee_id = s.sales_person_id
 left join products p
     on s.product_id = p.product_id
-group by seller
+group by e.employee_id, e.first_name, e.last_name
 order by income desc nulls last
 limit 10;
 
@@ -21,15 +21,15 @@ limit 10;
 -- Запрос выводит продавцов и среднюю выручку продавца, сортирует по продавцу, выводит продавцов с выручкой ниже средней
 select
     concat(e.first_name, ' ', e.last_name) as seller,
-    floor(avg(s.quantity * p.price)) as avg_income
+    floor(avg(coalesce(s.quantity,0) * coalesce(p.price,0))) as avg_income
 from employees e
 left join sales s
     on e.employee_id = s.sales_person_id
 left join products p
     on s.product_id = p.product_id
-group by seller
-having floor(avg(s.quantity * p.price)) < (
-    select avg(s2.quantity * p2.price)
+group by e.employee_id, e.first_name, e.last_name
+having floor(avg(coalesce(s.quantity,0) * coalesce(p.price,0))) < (
+    select avg(coalesce(s2.quantity,0) * coalesce(p2.price,0))
     from sales s2
     left join products p2 on s2.product_id = p2.product_id
 )
@@ -48,13 +48,13 @@ select
         when '6' then 'Saturday'
         when '7' then 'Sunday'
     end as day_of_week,
-    floor(sum(s.quantity * p.price)) as income
+    floor(sum(coalesce(s.quantity,0) * coalesce(p.price,0))) as income
 from employees e
 left join sales s
     on e.employee_id = s.sales_person_id
 left join products p
     on s.product_id = p.product_id
-group by seller, to_char(s.sale_date, 'ID')
+group by e.employee_id, e.first_name, e.last_name, to_char(s.sale_date, 'ID')
 order by to_char(s.sale_date, 'ID'), seller;
 
 -- age_groups
@@ -81,10 +81,10 @@ order by age_category asc;
 select
     to_char(s.sale_date, 'YYYY-MM') as selling_month,
     count(distinct s.customer_id) as total_customers,
-    trunc(sum(s.quantity * p.price)) as income
+    trunc(sum(coalesce(s.quantity,0) * coalesce(p.price,0))) as income
 from sales s
 inner join products p on s.product_id = p.product_id
-group by selling_month
+group by to_char(s.sale_date, 'YYYY-MM')
 order by selling_month asc;
 
 -- special_offer
