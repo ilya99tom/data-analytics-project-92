@@ -36,7 +36,7 @@ SELECT
 FROM
     sales
 LEFT JOIN employees
-    ON employees.employee_id = sales.sales_person_id
+    ON sales.sales_person_id = employees.employee_id
 LEFT JOIN products
     ON sales.product_id = products.product_id
 GROUP BY
@@ -83,7 +83,7 @@ SELECT
 FROM
     sales
 LEFT JOIN employees
-    ON employees.employee_id = sales.sales_person_id
+    ON sales.sales_person_id = employees.employee_id
 LEFT JOIN products
     ON sales.product_id = products.product_id
 GROUP BY
