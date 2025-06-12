@@ -15,7 +15,7 @@ SELECT
 FROM
     sales
 LEFT JOIN employees
-    ON employees.employee_id = sales.sales_person_id
+    ON sales.sales_person_id = employees.employee_id
 LEFT JOIN products
     ON sales.product_id = products.product_id
 GROUP BY
@@ -65,7 +65,7 @@ ORDER BY
 -- Выручка продавцов по дням недели
 SELECT
     CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
-    CASE EXTRACT(isodow FROM sales.sale_date)
+    CASE EXTRACT(ISODOW FROM sales.sale_date)
         WHEN 1 THEN 'Monday'
         WHEN 2 THEN 'Tuesday'
         WHEN 3 THEN 'Wednesday'
@@ -89,9 +89,9 @@ LEFT JOIN products
 GROUP BY
     employees.first_name,
     employees.last_name,
-    EXTRACT(isodow FROM sales.sale_date)
+    EXTRACT(ISODOW FROM sales.sale_date)
 ORDER BY
-    EXTRACT(isodow FROM sales.sale_date),
+    EXTRACT(ISODOW FROM sales.sale_date),
     seller;
 
 -- Количество участников по возрастам
@@ -145,8 +145,8 @@ FROM (
     WHERE
         products.price = 0
 ) AS rs
-INNER JOIN customers c ON rs.customer_id = c.customer_id
-LEFT JOIN employees e ON rs.sales_person_id = e.employee_id
+INNER JOIN customers AS c ON rs.customer_id = c.customer_id
+LEFT JOIN employees AS e ON rs.sales_person_id = e.employee_id
 WHERE
     rs.rn = 1
 ORDER BY
