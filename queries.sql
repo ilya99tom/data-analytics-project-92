@@ -13,13 +13,12 @@ SELECT
         )
     ) AS income
 FROM
-    employees
-LEFT JOIN sales
+    sales
+LEFT JOIN employees
     ON employees.employee_id = sales.sales_person_id
 LEFT JOIN products
     ON sales.product_id = products.product_id
 GROUP BY
-    employees.employee_id,
     employees.first_name,
     employees.last_name
 ORDER BY
@@ -35,13 +34,12 @@ SELECT
         )
     ) AS avg_income
 FROM
-    employees
-LEFT JOIN sales
+    sales
+LEFT JOIN employees
     ON employees.employee_id = sales.sales_person_id
 LEFT JOIN products
     ON sales.product_id = products.product_id
 GROUP BY
-    employees.employee_id,
     employees.first_name,
     employees.last_name
 HAVING
@@ -67,14 +65,14 @@ ORDER BY
 -- Выручка продавцов по дням недели
 SELECT
     CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
-    CASE TO_CHAR(sales.sale_date, 'ID')
-        WHEN '1' THEN 'Monday'
-        WHEN '2' THEN 'Tuesday'
-        WHEN '3' THEN 'Wednesday'
-        WHEN '4' THEN 'Thursday'
-        WHEN '5' THEN 'Friday'
-        WHEN '6' THEN 'Saturday'
-        WHEN '7' THEN 'Sunday'
+    CASE EXTRACT(isodow FROM sales.sale_date)
+        WHEN 1 THEN 'Monday'
+        WHEN 2 THEN 'Tuesday'
+        WHEN 3 THEN 'Wednesday'
+        WHEN 4 THEN 'Thursday'
+        WHEN 5 THEN 'Friday'
+        WHEN 6 THEN 'Saturday'
+        WHEN 7 THEN 'Sunday'
         ELSE 'Unknown'
     END AS day_of_week,
     FLOOR(
@@ -83,74 +81,36 @@ SELECT
         )
     ) AS income
 FROM
-    employees
-LEFT JOIN sales
+    sales
+LEFT JOIN employees
     ON employees.employee_id = sales.sales_person_id
 LEFT JOIN products
     ON sales.product_id = products.product_id
 GROUP BY
-    employees.employee_id,
     employees.first_name,
     employees.last_name,
-    TO_CHAR(sales.sale_date, 'ID')
+    EXTRACT(isodow FROM sales.sale_date)
 ORDER BY
-    TO_CHAR(sales.sale_date, 'ID'),
+    EXTRACT(isodow FROM sales.sale_date),
     seller;
 
 -- Количество участников по возрастам
-WITH y16_25 AS (
-    SELECT COUNT(*) AS age_count
-    FROM
-        customers
-    WHERE
-        customers.age BETWEEN 16 AND 25
-),
-
-y26_40 AS (
-    SELECT COUNT(*) AS age_count
-    FROM
-        customers
-    WHERE
-        customers.age BETWEEN 26 AND 40
-),
-
-y40 AS (
-    SELECT COUNT(*) AS age_count
-    FROM
-        customers
-    WHERE
-        customers.age > 40
-)
-
 SELECT
-    '16-25' AS age_category,
-    age_count AS count_in_group
-FROM
-    y16_25
-
-UNION ALL
-
-SELECT
-    '26-40' AS age_category,
-    age_count AS count_in_group
-FROM
-    y26_40
-
-UNION ALL
-
-SELECT
-    '40+' AS age_category,
-    age_count AS count_in_group
-FROM
-    y40
-ORDER BY
-    age_category ASC;
+    CASE
+        WHEN age BETWEEN 16 AND 25 THEN '16-25'
+        WHEN age BETWEEN 26 AND 40 THEN '26-40'
+        ELSE '40+'
+    END AS age_category,
+    COUNT(*) AS count_in_group
+FROM customers
+GROUP BY age_category
+ORDER BY age_category ASC;
 
 -- Количество уникальных покупателей и выручка по месяцам
 SELECT
     TO_CHAR(sales.sale_date, 'YYYY-MM') AS selling_month,
     COUNT(DISTINCT sales.customer_id) AS total_customers,
-    TRUNC(
+    FLOOR(
         SUM(
             COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
         )
@@ -165,14 +125,18 @@ ORDER BY
     selling_month ASC;
 
 -- Клиенты/продавцы первый товар с нулевой ценой
-WITH ranked_sales AS (
+SELECT
+    rs.sale_date,
+    c.first_name || ' ' || c.last_name AS customer,
+    e.first_name || ' ' || e.last_name AS seller
+FROM (
     SELECT
         sales.customer_id,
         sales.sale_date,
         sales.sales_person_id,
         ROW_NUMBER() OVER (
             PARTITION BY sales.customer_id
-            ORDER BY sales.sale_date ASC, sales.sales_id ASC
+            ORDER BY sales.sale_date ASC
         ) AS rn
     FROM
         sales
@@ -180,19 +144,10 @@ WITH ranked_sales AS (
         ON sales.product_id = products.product_id
     WHERE
         products.price = 0
-)
-
-SELECT
-    ranked_sales.sale_date,
-    customers.first_name || ' ' || customers.last_name AS customer,
-    employees.first_name || ' ' || employees.last_name AS seller
-FROM
-    ranked_sales
-INNER JOIN customers
-    ON ranked_sales.customer_id = customers.customer_id
-LEFT JOIN employees
-    ON ranked_sales.sales_person_id = employees.employee_id
+) AS rs
+INNER JOIN customers c ON rs.customer_id = c.customer_id
+LEFT JOIN employees e ON rs.sales_person_id = e.employee_id
 WHERE
-    ranked_sales.rn = 1
+    rs.rn = 1
 ORDER BY
-    customers.customer_id;
+    c.customer_id;
