@@ -66,14 +66,14 @@ ORDER BY
 SELECT
     CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
     CASE EXTRACT(ISODOW FROM sales.sale_date)
-        WHEN 1 THEN 'Monday'
-        WHEN 2 THEN 'Tuesday'
-        WHEN 3 THEN 'Wednesday'
-        WHEN 4 THEN 'Thursday'
-        WHEN 5 THEN 'Friday'
-        WHEN 6 THEN 'Saturday'
-        WHEN 7 THEN 'Sunday'
-        ELSE 'Unknown'
+        WHEN 1 THEN 'monday'
+        WHEN 2 THEN 'tuesday'
+        WHEN 3 THEN 'wednesday'
+        WHEN 4 THEN 'thursday'
+        WHEN 5 THEN 'friday'
+        WHEN 6 THEN 'saturday'
+        WHEN 7 THEN 'sunday'
+        ELSE 'unknown'
     END AS day_of_week,
     FLOOR(
         SUM(
