@@ -80,9 +80,11 @@ WITH total_for_day AS (
     LEFT JOIN products
         ON sales.product_id = products.product_id
     GROUP BY
-        1, 2, 3
+        seller,
+        week_day,
+        id_day
     ORDER BY
-        3
+        id_day
 )
 
 SELECT
@@ -149,3 +151,4 @@ WHERE
     rs.rn = 1
 ORDER BY
     c.customer_id;
+
