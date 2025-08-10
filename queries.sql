@@ -9,7 +9,7 @@ SELECT
     COUNT(sales.sales_person_id) AS operations,
     FLOOR(
         SUM(
-            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
+            sales.quantity * products.price
         )
     ) AS income
 FROM
@@ -30,7 +30,7 @@ SELECT
     CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
     FLOOR(
         AVG(
-            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
+            sales.quantity * products.price
         )
     ) AS avg_income
 FROM
@@ -45,14 +45,14 @@ GROUP BY
 HAVING
     FLOOR(
         AVG(
-            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
+            sales.quantity * products.price
         )
     )
     <
     (
         SELECT
             AVG(
-                COALESCE(s2.quantity, 0) * COALESCE(p2.price, 0)
+                s2.quantity * p2.price
             ) AS overall_avg
         FROM
             sales AS s2
@@ -77,7 +77,7 @@ SELECT
     END AS day_of_week,
     FLOOR(
         SUM(
-            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
+            sales.quantity * products.price
         )
     ) AS income
 FROM
@@ -112,7 +112,7 @@ SELECT
     COUNT(DISTINCT sales.customer_id) AS total_customers,
     FLOOR(
         SUM(
-            COALESCE(sales.quantity, 0) * COALESCE(products.price, 0)
+            sales.quantity * products.price
         )
     ) AS income
 FROM
@@ -151,3 +151,4 @@ WHERE
     rs.rn = 1
 ORDER BY
     c.customer_id;
+
