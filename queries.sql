@@ -63,36 +63,34 @@ ORDER BY
     avg_income ASC;
 
 -- Выручка продавцов по дням недели
+WITH total_for_day AS (
+    SELECT
+        CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
+        TO_CHAR(sales.sale_date, 'day') AS week_day,
+        TO_CHAR(sales.sale_date, 'ID') AS id_day,
+        FLOOR(
+            SUM(
+                sales.quantity * products.price
+            )
+        ) AS income
+    FROM
+        sales
+    LEFT JOIN employees
+        ON sales.sales_person_id = employees.employee_id
+    LEFT JOIN products
+        ON sales.product_id = products.product_id
+    GROUP BY
+        1, 2, 3
+    ORDER BY
+        3
+)
+
 SELECT
-    CONCAT(employees.first_name, ' ', employees.last_name) AS seller,
-    CASE EXTRACT(ISODOW FROM sales.sale_date)
-        WHEN 1 THEN 'monday'
-        WHEN 2 THEN 'tuesday'
-        WHEN 3 THEN 'wednesday'
-        WHEN 4 THEN 'thursday'
-        WHEN 5 THEN 'friday'
-        WHEN 6 THEN 'saturday'
-        WHEN 7 THEN 'sunday'
-        ELSE 'unknown'
-    END AS day_of_week,
-    FLOOR(
-        SUM(
-            sales.quantity * products.price
-        )
-    ) AS income
+    seller,
+    week_day,
+    income
 FROM
-    sales
-LEFT JOIN employees
-    ON sales.sales_person_id = employees.employee_id
-LEFT JOIN products
-    ON sales.product_id = products.product_id
-GROUP BY
-    employees.first_name,
-    employees.last_name,
-    EXTRACT(ISODOW FROM sales.sale_date)
-ORDER BY
-    EXTRACT(ISODOW FROM sales.sale_date),
-    seller;
+    total_for_day;
 
 -- Количество участников по возрастам
 SELECT
@@ -151,4 +149,3 @@ WHERE
     rs.rn = 1
 ORDER BY
     c.customer_id;
-
