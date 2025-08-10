@@ -151,4 +151,3 @@ WHERE
     rs.rn = 1
 ORDER BY
     c.customer_id;
-
